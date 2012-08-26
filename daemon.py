@@ -49,45 +49,36 @@ def autocomplete(r, prefix, count):
 
 def search(query, n):
   query = canonicalize_input(query)
+  if query in dict_lookup:
+    return (dict_lookup[query], query)
+
   results = set()
   for result in autocomplete(r, query, n):
-    results.update([(weight, itemid, dict_itemid[itemid]) for weight, itemid in dict_lookup[result]])
-  return sorted(list(results), reverse=True)[:n]
+    results.add((dict_lookup[result], result))
+  return list(results)[:n]
 
 # Build index
 regex = re.compile('wowhead.com/item=(.*?)/(.*?)<')
 c = 0
 print 'Working...'
-dict_words = set()
+itemname_set = set()
 dict_lookup = {}
-dict_itemid = {}
 for line in open('data/all'):
   m = regex.search(line)
   if m and len(m.groups()) == 2:
     c += 1
     itemid = m.group(1)
     itemname = canonicalize_input(m.group(2).replace('-', ' '))
-
-    dict_itemid[itemid] = itemname
-
-    tokens = itemname.split()
-    weight = 10
-    for token in tokens:
-      dict_words.add(token)
-      dict_lookup.setdefault(token, [])
-      dict_lookup[token].append((weight, itemid))
-      weight -= 1
+    itemname_set.add(itemname)
+    dict_lookup[itemname] = itemid
 
 r = Redis()
-build_redis_index(r, dict_words)
+build_redis_index(r, itemname_set)
 
 if __name__ == "__main__":
-  print c, 'items'
-  print 'Ready'
+  print 'Ready with', c, 'items'
 
   while True:
     print 'Search: ',
     query = raw_input()
-
-    # TODO check for exact match
     print search(query, 5)
