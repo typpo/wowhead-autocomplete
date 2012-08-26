@@ -13,4 +13,3 @@ wget http://www.wowhead.com/sitemap=transmog-set/1
 
 cat * > all
 popd
-python daemon.py
