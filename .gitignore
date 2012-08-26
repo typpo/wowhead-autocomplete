@@ -1,0 +1,16 @@
+/bin/
+/lib/
+/include/
+/local
+/src/
+/build/
+/pip-log.txt
+/development.db
+/media/
+/static/
+*.pyc
+*~
+*.db
+*.swo
+*.swp
+/data/
