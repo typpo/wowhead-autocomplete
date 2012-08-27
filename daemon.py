@@ -58,25 +58,27 @@ def search(query, n):
   return list(results)[:n]
 
 # Build index
-regex = re.compile('wowhead.com/item=(.*?)/(.*?)<')
+regex = re.compile('wowhead.com/(item|spell|itemset|transmog-set)=(.*?)/(.*?)<')
 c = 0
 print 'Working...'
 itemname_set = set()
 dict_lookup = {}
 for line in open('data/all'):
   m = regex.search(line)
-  if m and len(m.groups()) == 2:
+  if m and len(m.groups()) == 3:
     c += 1
-    itemid = m.group(1)
-    itemname = canonicalize_input(m.group(2).replace('-', ' '))
+    itemid = m.group(2)
+    itemname = canonicalize_input(m.group(3).replace('-', ' '))
     itemname_set.add(itemname)
     dict_lookup[itemname] = itemid
+
+    # TODO don't require prefix
 
 r = Redis()
 build_redis_index(r, itemname_set)
 
 if __name__ == "__main__":
-  print 'Ready with', c, 'items'
+  print 'Ready with', c, 'entries'
 
   while True:
     print 'Search: ',
